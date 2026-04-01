@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPM TikTok Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d0d;
+      --surface:   #1a1a1a;
+      --surface2:  #222222;
+      --border:    #2a2a2a;
+      --accent:    #00c896;
+      --accent-dim:#00c89622;
+      --text:      #e8e8e8;
+      --muted:     #888;
+      --green:     #00c896;
+      --amber:     #f59e0b;
+      --red:       #ef4444;
+      --orange:    #f97316;
+      --blue:      #3b82f6;
+      --yellow:    #eab308;
+      --radius:    10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0 18px;
+      margin-bottom: 32px;
+      position: sticky;
+      top: 0;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    .site-header .container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .site-header h1 {
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    .site-header h1 span {
+      color: var(--accent);
+    }
+
+    .header-subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 400;
+    }
+
+    /* ── Loading ── */
+    #loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    #error-state {
+      display: none;
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .error-icon { font-size: 40px; margin-bottom: 12px; }
+
+    #error-state h2 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--red);
+    }
+
+    #error-state p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* ── Dashboard ── */
+    #dashboard { display: none; padding-bottom: 60px; }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      color: var(--text);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Overview grid ── */
+    .overview { margin-bottom: 48px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-card .stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+
+    /* ── Bar breakdowns ── */
+    .breakdowns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 560px) {
+      .breakdowns { grid-template-columns: 1fr; }
+    }
+
+    .breakdown-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .breakdown-card h3 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    .breakdown-row:last-child { margin-bottom: 0; }
+
+    .breakdown-label {
+      min-width: 130px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .breakdown-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .breakdown-bar {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.6s ease;
+    }
+
+    .breakdown-count {
+      min-width: 20px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .bar-green  { background: var(--green); }
+    .bar-amber  { background: var(--amber); }
+    .bar-red    { background: var(--red); }
+    .bar-orange { background: var(--orange); }
+    .bar-yellow { background: var(--yellow); }
+    .bar-blue   { background: var(--blue); }
+
+    /* ── Highlight card ── */
+    .highlight-card {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .highlight-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent-dim) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .highlight-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .highlight-card .video-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.15rem;
+      margin-bottom: 6px;
+    }
+
+    .highlight-card .video-meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .highlight-card .video-resumo {
+      font-size: 0.88rem;
+      color: #ccc;
+      margin-bottom: 14px;
+      line-height: 1.55;
+    }
+
+    /* ── Weekly groups ── */
+    .weekly-section { margin-bottom: 12px; }
+
+    .week-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .week-header:hover {
+      background: var(--surface2);
+      border-color: #383838;
+    }
+
+    .week-header-left { display: flex; flex-direction: column; gap: 3px; }
+
+    .week-header-left h2 {
+      font-size: 1rem;
+      font-family: 'Fraunces', serif;
+    }
+
+    .week-summary {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 400;
+    }
+
+    .week-chevron {
+      font-size: 1.1rem;
+      color: var(--muted);
+      transition: transform 0.25s;
+      flex-shrink: 0;
+    }
+
+    .weekly-section.open .week-chevron { transform: rotate(180deg); }
+
+    .week-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+
+    .weekly-section.open .week-body { max-height: 9999px; }
+
+    .week-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      padding: 12px 0 4px;
+    }
+
+    /* ── Video cards ── */
+    .video-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    }
+
+    .video-card:hover {
+      transform: translateY(-2px);
+      border-color: #383838;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1.3;
+    }
+
+    .card-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .card-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 99px;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-bem     { background: rgba(0,200,150,0.15); color: var(--green); border: 1px solid rgba(0,200,150,0.3); }
+    .badge-ressalva{ background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+    .badge-mal     { background: rgba(239,68,68,0.15);  color: var(--red);   border: 1px solid rgba(239,68,68,0.3); }
+
+    .badge-alto   { background: rgba(249,115,22,0.15); color: var(--orange); border: 1px solid rgba(249,115,22,0.3); }
+    .badge-medio  { background: rgba(234,179,8,0.15);  color: var(--yellow); border: 1px solid rgba(234,179,8,0.3); }
+    .badge-baixo  { background: rgba(59,130,246,0.15); color: var(--blue);   border: 1px solid rgba(59,130,246,0.3); }
+
+    .card-resumo {
+      font-size: 0.84rem;
+      color: #bbb;
+      line-height: 1.55;
+    }
+
+    .resumo-truncated { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .resumo-expanded  { display: block; }
+
+    .btn-vermais {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500;
+      margin-top: -4px;
+      align-self: flex-start;
+    }
+
+    .btn-vermais:hover { text-decoration: underline; }
+
+    .btn-tiktok {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.8rem;
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+      align-self: flex-start;
+      margin-top: auto;
+    }
+
+    .btn-tiktok:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .tiktok-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* ── General button ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #000;
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.88; }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .week-cards { grid-template-columns: 1fr; }
+      .site-header h1 { font-size: 1.05rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-logo">📱</div>
+      <div>
+        <h1>IPM <span>TikTok</span> Monitor</h1>
+        <div class="header-subtitle">Vídeos de alunos sobre a mentoria IPM</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Loading -->
+    <div id="loading-state">
+      <div class="spinner"></div>
+      <span>Carregando dados da planilha…</span>
+    </div>
+
+    <!-- Error -->
+    <div id="error-state">
+      <div class="error-icon">⚠️</div>
+      <h2>Não foi possível carregar os dados</h2>
+      <p id="error-message">Verifique se a planilha está publicada corretamente e se o link no código está atualizado.</p>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard">
+
+      <!-- Seção 1: Visão Geral -->
+      <section class="overview">
+        <h2 class="section-title">Visão Geral</h2>
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="breakdowns">
+          <div class="breakdown-card" id="sentiment-breakdown"></div>
+          <div class="breakdown-card" id="reach-breakdown"></div>
+        </div>
+        <div id="highlight-wrap"></div>
+      </section>
+
+      <!-- Seção 2: Por Semana -->
+      <section class="weekly">
+        <h2 class="section-title">Por Semana</h2>
+        <div id="weekly-groups"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // ─────────────────────────────────────────────
+    // CONFIGURAÇÃO — substitua pelo link real do CSV
+    // ─────────────────────────────────────────────
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZXy2_uQWoDC3K1c--BChcH6AohQbaDdjp0Qu5WuCxSXkSFJyWYjaO1tjJSQVHodbwMj4veuEuPOcn/pub?gid=328096082&single=true&output=csv";
+    // Exemplo:
+    // const SHEET_URL = "https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/export?format=csv&gid=0";
+    // ─────────────────────────────────────────────
+
+    // ── CSV Parser (suporta campos entre aspas) ──
+    function parseCSV(text) {
+      const rows = [];
+      const lines = text.split(/\r?\n/);
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const cols = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+            else { inQuotes = !inQuotes; }
+          } else if (ch === ',' && !inQuotes) {
+            cols.push(cur.trim());
+            cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        cols.push(cur.trim());
+        rows.push(cols);
+      }
+      return rows;
+    }
+
+    // ── Derive week label from a BR date string (DD/MM/YYYY) ──
+    function deriveWeek(dateStr) {
+      if (!dateStr) return 'Sem data';
+      const [d, m, y] = dateStr.split('/').map(Number);
+      if (!d || !m || !y) return 'Sem data';
+      const date = new Date(y, m - 1, d);
+      // Find Monday of that week (day 0=Sun → offset 6, day 1=Mon → offset 0, etc.)
+      const day = date.getDay();
+      const diffToMon = (day === 0) ? -6 : 1 - day;
+      const mon = new Date(date); mon.setDate(date.getDate() + diffToMon);
+      const sun = new Date(mon);  sun.setDate(mon.getDate() + 6);
+      const fmt = (dt) => `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
+      return `${fmt(mon)} a ${fmt(sun)}/${sun.getFullYear()}`;
+    }
+
+    // ── Map CSV rows → video objects (auto-detects column layout) ──
+    function rowsToVideos(rows) {
+      const [header, ...data] = rows;
+      // Normalise header names (lower, trim, remove BOM)
+      const h = header.map(c => c.toLowerCase().trim().replace(/^\uFEFF/, ''));
+      const idx = name => h.indexOf(name);
+
+      // Detect whether spreadsheet has a "semana" column
+      const hasSemana = idx('semana') !== -1;
+
+      // Column indices — fall back to positional if header not found
+      const col = {
+        semana:        idx('semana'),
+        aluno:         idx('aluno')         !== -1 ? idx('aluno')         : 0,
+        link:          idx('link')          !== -1 ? idx('link')          : 1,
+        data_postagem: idx('data_postagem') !== -1 ? idx('data_postagem') : 2,
+        resumo:        idx('resumo')        !== -1 ? idx('resumo')        : 3,
+        sentimento:    idx('sentimento')    !== -1 ? idx('sentimento')    : 4,
+        alcance:       idx('alcance')       !== -1 ? idx('alcance')       : 5,
+        responsavel:   idx('responsavel'),
+      };
+
+      return data
+        .filter(r => r.length >= 4 && r[col.aluno])
+        .map(r => {
+          const data_postagem = r[col.data_postagem] || '';
+          const semana = hasSemana ? (r[col.semana] || '') : deriveWeek(data_postagem);
+          return {
+            semana,
+            aluno:         r[col.aluno]         || '',
+            link:          r[col.link]          || '',
+            data_postagem,
+            resumo:        r[col.resumo]        || '',
+            sentimento:    r[col.sentimento]    || '',
+            alcance:       r[col.alcance]       || '',
+            responsavel:   col.responsavel !== -1 ? (r[col.responsavel] || '') : '',
+          };
+        });
+    }
+
+    // ── Parse BR date (DD/MM/YYYY) → Date ──
+    function parseBRDate(str) {
+      const [d, m, y] = str.split('/');
+      return new Date(+y, +m - 1, +d);
+    }
+
+    // ── Parse semana end date for sorting ──
+    function semanaEndDate(semana) {
+      // Format: "22/03 a 28/03/2026"
+      const parts = semana.split(' a ');
+      if (parts.length < 2) return new Date(0);
+      const end = parts[1].trim(); // "28/03/2026"
+      const [d, m, y] = end.split('/');
+      return new Date(+y, +m - 1, +d);
+    }
+
+    // ── Sentiment badge ──
+    function sentimentBadge(s) {
+      if (s === 'Falando bem') return `<span class="badge badge-bem">✅ Falando bem</span>`;
+      if (s === 'Falando bem com ressalvas') return `<span class="badge badge-ressalva">⚠️ Com ressalvas</span>`;
+      if (s === 'Falando mal') return `<span class="badge badge-mal">❌ Falando mal</span>`;
+      return `<span class="badge">${s}</span>`;
+    }
+
+    // ── Reach badge ──
+    function reachBadge(a) {
+      if (a === 'Alto')  return `<span class="badge badge-alto">🔥 Alto</span>`;
+      if (a === 'Médio') return `<span class="badge badge-medio">🟡 Médio</span>`;
+      if (a === 'Baixo') return `<span class="badge badge-baixo">🔵 Baixo</span>`;
+      return `<span class="badge">${a}</span>`;
+    }
+
+    // ── Video card HTML ──
+    function videoCardHTML(v, id) {
+      return `
+        <div class="video-card">
+          <div class="card-top">
+            <div class="card-name">${escHtml(v.aluno)}</div>
+            <div class="card-date">${escHtml(v.data_postagem)}</div>
+          </div>
+          <div class="card-badges">
+            ${reachBadge(v.alcance)}
+            ${sentimentBadge(v.sentimento)}
+          </div>
+          ${v.resumo ? `
+          <div class="card-resumo resumo-truncated" id="resumo-${id}">${escHtml(v.resumo)}</div>
+          <button class="btn-vermais" onclick="toggleResumo('${id}', this)">ver mais</button>
+          ` : ''}
+          ${v.link ? `
+          <a class="btn-tiktok" href="${escAttr(v.link)}" target="_blank" rel="noopener">
+            <svg class="tiktok-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.53V6.78a4.85 4.85 0 01-1.02-.09z"/>
+            </svg>
+            Ver no TikTok
+          </a>
+          ` : ''}
+        </div>`;
+    }
+
+    // ── Toggle resumo expand ──
+    function toggleResumo(id, btn) {
+      const el = document.getElementById(`resumo-${id}`);
+      const expanded = el.classList.contains('resumo-expanded');
+      if (expanded) {
+        el.classList.remove('resumo-expanded');
+        el.classList.add('resumo-truncated');
+        btn.textContent = 'ver mais';
+      } else {
+        el.classList.remove('resumo-truncated');
+        el.classList.add('resumo-expanded');
+        btn.textContent = 'ver menos';
+      }
+    }
+
+    // ── Escape HTML ──
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function escAttr(str) { return escHtml(str); }
+
+    // ── Render overview ──
+    function renderOverview(videos) {
+      const total = videos.length;
+
+      // Sentiment counts
+      const sentCounts = { 'Falando bem': 0, 'Falando bem com ressalvas': 0, 'Falando mal': 0 };
+      // Reach counts
+      const reachCounts = { 'Alto': 0, 'Médio': 0, 'Baixo': 0 };
+
+      for (const v of videos) {
+        if (v.sentimento in sentCounts) sentCounts[v.sentimento]++;
+        if (v.alcance in reachCounts) reachCounts[v.alcance]++;
+      }
+
+      const semanas = [...new Set(videos.map(v => v.semana))].length;
+
+      // Stats grid
+      document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${total}</div>
+          <div class="stat-label">Vídeos monitorados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${sentCounts['Falando bem']}</div>
+          <div class="stat-label">Avaliações positivas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${reachCounts['Alto']}</div>
+          <div class="stat-label">Alcance Alto</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${semanas}</div>
+          <div class="stat-label">Semanas monitoradas</div>
+        </div>
+      `;
+
+      // Sentiment breakdown
+      const sentRows = [
+        { label: '✅ Falando bem',           count: sentCounts['Falando bem'],                   barClass: 'bar-green' },
+        { label: '⚠️ Com ressalvas',          count: sentCounts['Falando bem com ressalvas'],      barClass: 'bar-amber' },
+        { label: '❌ Falando mal',            count: sentCounts['Falando mal'],                   barClass: 'bar-red'   },
+      ];
+      document.getElementById('sentiment-breakdown').innerHTML = `
+        <h3>Sentimento</h3>
+        ${sentRows.map(r => `
+          <div class="breakdown-row">
+            <span class="breakdown-label">${r.label}</span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar ${r.barClass}" style="width:${total ? Math.round(r.count/total*100) : 0}%"></div>
+            </div>
+            <span class="breakdown-count">${r.count}</span>
+          </div>
+        `).join('')}
+      `;
+
+      // Reach breakdown
+      const reachRows = [
+        { label: '🔥 Alto',  count: reachCounts['Alto'],  barClass: 'bar-orange' },
+        { label: '🟡 Médio', count: reachCounts['Médio'], barClass: 'bar-yellow' },
+        { label: '🔵 Baixo', count: reachCounts['Baixo'], barClass: 'bar-blue'   },
+      ];
+      document.getElementById('reach-breakdown').innerHTML = `
+        <h3>Alcance</h3>
+        ${reachRows.map(r => `
+          <div class="breakdown-row">
+            <span class="breakdown-label">${r.label}</span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar ${r.barClass}" style="width:${total ? Math.round(r.count/total*100) : 0}%"></div>
+            </div>
+            <span class="breakdown-count">${r.count}</span>
+          </div>
+        `).join('')}
+      `;
+
+      // Highlight: most recent video with Alto reach
+      const altoVideos = videos
+        .filter(v => v.alcance === 'Alto' && v.data_postagem)
+        .sort((a, b) => parseBRDate(b.data_postagem) - parseBRDate(a.data_postagem));
+
+      const highlight = altoVideos[0] || null;
+      if (highlight) {
+        document.getElementById('highlight-wrap').innerHTML = `
+          <div class="highlight-card">
+            <div class="highlight-label">⭐ Destaque da semana — maior alcance</div>
+            <div class="video-title">${escHtml(highlight.aluno)}</div>
+            <div class="video-meta">${escHtml(highlight.data_postagem)} · ${escHtml(highlight.semana)}</div>
+            <div class="video-resumo">${escHtml(highlight.resumo)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              ${reachBadge(highlight.alcance)} ${sentimentBadge(highlight.sentimento)}
+              ${highlight.link ? `<a class="btn" href="${escAttr(highlight.link)}" target="_blank" rel="noopener">
+                Ver no TikTok ↗
+              </a>` : ''}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ── Render weekly groups ──
+    function renderWeeklyGroups(videos) {
+      // Group by semana
+      const groups = {};
+      for (const v of videos) {
+        if (!groups[v.semana]) groups[v.semana] = [];
+        groups[v.semana].push(v);
+      }
+
+      // Sort weeks descending by end date
+      const sortedWeeks = Object.keys(groups).sort((a, b) => {
+        return semanaEndDate(b) - semanaEndDate(a);
+      });
+
+      const container = document.getElementById('weekly-groups');
+      container.innerHTML = '';
+
+      sortedWeeks.forEach((semana, wi) => {
+        const weekVideos = groups[semana];
+        const positivos = weekVideos.filter(v => v.sentimento === 'Falando bem').length;
+        const summary = `${weekVideos.length} vídeo${weekVideos.length !== 1 ? 's' : ''} · ${positivos} positivo${positivos !== 1 ? 's' : ''}`;
+
+        const section = document.createElement('div');
+        section.className = 'weekly-section' + (wi === 0 ? ' open' : '');
+        section.innerHTML = `
+          <div class="week-header" onclick="toggleWeek(this)">
+            <div class="week-header-left">
+              <h2>Semana ${escHtml(semana)}</h2>
+              <span class="week-summary">${summary}</span>
+            </div>
+            <span class="week-chevron">▾</span>
+          </div>
+          <div class="week-body">
+            <div class="week-cards">
+              ${weekVideos.map((v, ci) => videoCardHTML(v, `${wi}-${ci}`)).join('')}
+            </div>
+          </div>
+        `;
+        container.appendChild(section);
+      });
+    }
+
+    // ── Toggle week collapse ──
+    function toggleWeek(header) {
+      header.closest('.weekly-section').classList.toggle('open');
+    }
+
+    // ── Show/hide states ──
+    function showLoading() {
+      document.getElementById('loading-state').style.display = 'flex';
+      document.getElementById('error-state').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+
+    function showError(msg) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+      if (msg) document.getElementById('error-message').textContent = msg;
+    }
+
+    function showDashboard() {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+    }
+
+    // ── Main fetch & render ──
+    async function init() {
+      showLoading();
+
+      if (!SHEET_URL || SHEET_URL === 'COLE_AQUI_A_URL_DO_CSV_DO_GOOGLE_SHEETS') {
+        showError('A URL da planilha ainda não foi configurada. Abra o arquivo index.html, localize a variável SHEET_URL no topo do script e substitua pelo link CSV da sua planilha Google Sheets.');
+        return;
+      }
+
+      try {
+        const res = await fetch(SHEET_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        const rows = parseCSV(text);
+        if (rows.length < 2) throw new Error('Planilha vazia ou sem dados');
+        const videos = rowsToVideos(rows);
+        if (videos.length === 0) throw new Error('Nenhum vídeo encontrado — verifique o formato das colunas');
+        renderOverview(videos);
+        renderWeeklyGroups(videos);
+        showDashboard();
+      } catch (err) {
+        console.error(err);
+        showError(`Erro ao carregar dados: ${err.message}. Verifique se a planilha está publicada como CSV e se a URL está correta.`);
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>
