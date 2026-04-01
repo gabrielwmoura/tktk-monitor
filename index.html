@@ -16,8 +16,8 @@
       --surface:   #1a1a1a;
       --surface2:  #222222;
       --border:    #2a2a2a;
-      --accent:    #00c896;
-      --accent-dim:#00c89622;
+      --accent:    #E3600B;
+      --accent-dim:#E3600B22;
       --text:      #e8e8e8;
       --muted:     #888;
       --green:     #00c896;
@@ -67,32 +67,29 @@
     .site-header .container {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
     }
 
-    .header-logo {
-      width: 36px;
-      height: 36px;
-      background: var(--accent);
-      border-radius: 8px;
+    .header-logo-ipm {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 18px;
       flex-shrink: 0;
     }
 
-    .site-header h1 {
-      font-size: 1.25rem;
-      color: var(--text);
+    .header-logo-ipm svg {
+      height: 36px;
+      width: auto;
     }
 
-    .site-header h1 span {
-      color: var(--accent);
+    .header-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+      flex-shrink: 0;
     }
 
     .header-subtitle {
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       color: var(--muted);
       font-family: 'Outfit', sans-serif;
       font-weight: 400;
@@ -524,11 +521,20 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container">
-      <div class="header-logo">📱</div>
-      <div>
-        <h1>IPM <span>TikTok</span> Monitor</h1>
-        <div class="header-subtitle">Vídeos de alunos sobre a mentoria IPM</div>
+      <div class="header-logo-ipm">
+        <svg width="733" height="247" viewBox="0 0 733 247" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M303.449 60.3652L335.137 60.3652L335.137 91.6953L335.137 183.597L303.449 183.597L303.449 123.025L335.137 91.6953L303.449 91.6953L303.449 60.3652Z" fill="white"/>
+          <path d="M490.007 62.291L398.411 62.291L398.411 91.4542L490.007 91.4542L490.007 124.784L397.358 124.784L366.826 154.988L366.826 185.193L398.411 185.193L398.411 153.947L490.007 153.947L520.538 124.784L520.538 91.4542L490.007 62.291Z" fill="white"/>
+          <path d="M548.757 62.291L548.757 185.193L579.289 185.193L579.289 93.5373L640.352 123.742L701.416 94.5788L701.416 62.291L640.352 93.5373L579.289 62.291L548.757 62.291Z" fill="white"/>
+          <path d="M701.416 94.5781L733.001 94.5781L733.001 185.192L701.416 185.192L701.416 94.5781Z" fill="white"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M245.92 0.441406L135.317 49.6126L122.949 61.9764V123.369L135.317 111.005L245.92 61.9764V0.441406Z" fill="#F15726"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0.441406L110.603 49.6126L122.971 61.9764V123.369L110.603 111.005L0 61.9764V0.441406Z" fill="#B84900"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M245.92 246.296L135.317 197.125L122.949 184.761V123.368L135.317 135.732L245.92 184.761V246.296Z" fill="#B84900"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M0 246.296L110.603 197.125L122.971 184.903V123.368L110.603 135.732L0 184.903V246.296Z" fill="#F15726"/>
+        </svg>
       </div>
+      <div class="header-divider"></div>
+      <div class="header-subtitle">TikTok Monitor · Vídeos de alunos</div>
     </div>
   </header>
 
