@@ -687,6 +687,20 @@
       flex-shrink: 0;
       font-size: 0.8rem;
     }
+    .top-alunos-toggle {
+      margin-top: 10px;
+      background: none;
+      border: 1px dashed #333;
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: color .15s, border-color .15s;
+    }
+    .top-alunos-toggle:hover { color: var(--text); border-color: #555; }
 
     /* ── Comment cards ── */
     .comment-card {
@@ -1277,13 +1291,23 @@
       const top = all.slice(0, 8);
       const rest = all.slice(8);
       const restCount = rest.reduce((s, a) => s + a.count, 0);
-      const restFooter = rest.length > 0
-        ? `<div class="top-aluno-row" style="color:var(--text-muted);font-size:0.82rem;padding-top:8px;border-top:1px solid #222;margin-top:4px;">
-             <span></span>
-             <span>+ ${rest.length} outro${rest.length > 1 ? 's' : ''} aluno${rest.length > 1 ? 's' : ''}</span>
-             <span></span>
-             <span>${restCount}</span>
-           </div>`
+      const uid = containerId + '-rest';
+      const restHTML = rest.length > 0
+        ? `<div id="${uid}" style="display:none;">
+             ${rest.map((a, i) => `
+               <div class="top-aluno-row">
+                 <span class="top-aluno-rank">${top.length + i + 1}.</span>
+                 <span class="top-aluno-name">${escHtml(a.name)}</span>
+                 <span class="top-aluno-link">${linkBadge(a.link)}</span>
+                 <span class="top-aluno-count">${a.count}</span>
+               </div>`).join('')}
+           </div>
+           <button class="top-alunos-toggle" onclick="(function(btn){
+             var el=document.getElementById('${uid}');
+             var open=el.style.display!=='none';
+             el.style.display=open?'none':'block';
+             btn.textContent=open?'+ ${rest.length} outro${rest.length > 1 ? 's' : ''} aluno${rest.length > 1 ? 's' : ''} (${restCount})':'▲ Mostrar menos';
+           })(this)">+ ${rest.length} outro${rest.length > 1 ? 's' : ''} aluno${rest.length > 1 ? 's' : ''} (${restCount})</button>`
         : '';
       document.getElementById(containerId).innerHTML = `
         <div class="top-alunos-card">
@@ -1296,7 +1320,7 @@
               <span class="top-aluno-count">${a.count}</span>
             </div>
           `).join('') || '<div style="color:var(--muted);font-size:0.85rem;">Sem dados ainda.</div>'}
-          ${restFooter}
+          ${restHTML}
         </div>
       `;
     }
