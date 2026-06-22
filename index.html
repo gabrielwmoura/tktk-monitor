@@ -896,7 +896,7 @@
         </svg>
       </div>
       <div class="header-divider"></div>
-      <div class="header-subtitle">TikTok Monitor · Vídeos de alunos</div>
+      <div class="header-subtitle">TikTok Monitor · Monitoramento de vídeos 2026</div>
     </div>
   </header>
 
@@ -1067,6 +1067,17 @@
       return `${fmt(mon)} a ${fmt(sun)}/${sun.getFullYear()}`;
     }
 
+    // ── Normaliza sentimento: trim + variantes aceitas ──
+    function normSentimento(s) {
+      s = (s || '').trim();
+      if (/^falando bem,/i.test(s) || /^falando bem com ressalva$/i.test(s)) return 'Falando bem com ressalvas';
+      if (/^falando bem$/i.test(s)) return 'Falando bem';
+      if (/^falando mal$/i.test(s)) return 'Falando mal';
+      if (/^neutro$/i.test(s)) return 'Neutro';
+      // fallback: capitalize primeiras letras após trim
+      return s;
+    }
+
     // ── Map CSV rows → video objects ──
     function rowsToVideos(rows) {
       const [header, ...data] = rows;
@@ -1099,7 +1110,7 @@
             link:          r[col.link]          || '',
             data_postagem,
             resumo:        r[col.resumo]        || '',
-            sentimento:    r[col.sentimento]    || '',
+            sentimento:    normSentimento(r[col.sentimento]),
             alcance:       r[col.alcance]       || '',
             responsavel:   col.responsavel !== -1 ? (r[col.responsavel] || '') : '',
           };
