@@ -1013,8 +1013,8 @@
     // ─────────────────────────────────────────────
     // CONFIGURAÇÃO — substitua pelos links reais dos CSVs
     // ─────────────────────────────────────────────
-    const SHEET_URL_VIDEOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZXy2_uQWoDC3K1c--BChcH6AohQbaDdjp0Qu5WuCxSXkSFJyWYjaO1tjJSQVHodbwMj4veuEuPOcn/pub?gid=328096082&single=true&output=csv";
-    const SHEET_URL_COMMENTS = "COLE_AQUI_A_URL_DO_CSV_DE_COMENTARIOS";
+    const SHEET_URL_VIDEOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZXy2_uQWoDC3K1c--BChcH6AohQbaDdjp0Qu5WuCxSXkSFJyWYjaO1tjJSQVHodbwMj4veuEuPOcn/pub?output=csv";
+    const SHEET_URL_COMMENTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcEc8I6H-vwC1SyfMeCTzNn7aUU2O0BGkAl6rwfXWKLgnjv4F_blLqWKsARNESXo-R7UI42somvve4/pub?output=csv";
     // ─────────────────────────────────────────────
 
     // Termos que sinalizam "não encontramos o link do aluno na plataforma"
@@ -1071,7 +1071,7 @@
     function rowsToVideos(rows) {
       const [header, ...data] = rows;
       const h = header.map(c => c.toLowerCase().trim().replace(/^﻿/, ''));
-      const idx = name => h.indexOf(name);
+      const idx = name => { const e = h.indexOf(name); if (e !== -1) return e; return h.findIndex(c => c.includes(name) || name.includes(c) && name.length > 3); };
 
       const hasSemana = idx('semana') !== -1;
 
@@ -1110,7 +1110,7 @@
     function rowsToComments(rows) {
       const [header, ...data] = rows;
       const h = header.map(c => c.toLowerCase().trim().replace(/^﻿/, ''));
-      const idx = name => h.indexOf(name);
+      const idx = name => { const e = h.indexOf(name); if (e !== -1) return e; return h.findIndex(c => c.includes(name) || name.includes(c) && name.length > 3); };
 
       const hasSemana = idx('semana') !== -1;
 
