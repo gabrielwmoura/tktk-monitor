@@ -1071,7 +1071,7 @@
     function rowsToVideos(rows) {
       const [header, ...data] = rows;
       const h = header.map(c => c.toLowerCase().trim().replace(/^﻿/, ''));
-      const idx = name => { const e = h.indexOf(name); if (e !== -1) return e; return h.findIndex(c => c.includes(name) || name.includes(c) && name.length > 3); };
+      const idx = name => { const e = h.indexOf(name); if (e !== -1) return e; return h.findIndex(c => c.includes(name)); };
 
       const hasSemana = idx('semana') !== -1;
 
@@ -1110,7 +1110,7 @@
     function rowsToComments(rows) {
       const [header, ...data] = rows;
       const h = header.map(c => c.toLowerCase().trim().replace(/^﻿/, ''));
-      const idx = name => { const e = h.indexOf(name); if (e !== -1) return e; return h.findIndex(c => c.includes(name) || name.includes(c) && name.length > 3); };
+      const idx = name => { const e = h.indexOf(name); if (e !== -1) return e; return h.findIndex(c => c.includes(name)); };
 
       const hasSemana = idx('semana') !== -1;
 
