@@ -1141,7 +1141,8 @@
 
     // ── Parse BR date (DD/MM/YYYY) → Date ──
     function parseBRDate(str) {
-      const [d, m, y] = str.split('/');
+      const norm = str.replace(/[.:]/g, '/');
+      const [d, m, y] = norm.split('/');
       return new Date(+y, +m - 1, +d);
     }
 
@@ -1236,10 +1237,6 @@
         <div class="stat-card">
           <div class="stat-value">${reachCounts['Alto']}</div>
           <div class="stat-label">Alcance Alto</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${semanas}</div>
-          <div class="stat-label">Semanas monitoradas</div>
         </div>
       `;
 
