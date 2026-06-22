@@ -1078,7 +1078,7 @@
       const col = {
         semana:        idx('semana'),
         aluno:         idx('aluno')         !== -1 ? idx('aluno')         : 0,
-        link_aluno:    idx('link_aluno')    !== -1 ? idx('link_aluno')    : (idx('link da plataforma') !== -1 ? idx('link da plataforma') : -1),
+        link_aluno:    ['link_aluno','link da plataforma','plataforma'].reduce((f,k)=>f!==-1?f:idx(k),-1),
         link:          idx('link')          !== -1 ? idx('link')          : 1,
         data_postagem: idx('data_postagem') !== -1 ? idx('data_postagem') : 2,
         resumo:        idx('resumo')        !== -1 ? idx('resumo')        : 3,
@@ -1117,7 +1117,7 @@
       const col = {
         semana:        idx('semana'),
         aluno:         idx('aluno')         !== -1 ? idx('aluno')         : 0,
-        link_aluno:    idx('link_aluno')    !== -1 ? idx('link_aluno')    : (idx('link da plataforma') !== -1 ? idx('link da plataforma') : 1),
+        link_aluno:    ['link_aluno','link da plataforma','plataforma'].reduce((f,k)=>f!==-1?f:idx(k),-1),
         link_post:     idx('link_post')     !== -1 ? idx('link_post')     : (idx('link do post') !== -1 ? idx('link do post') : 2),
         data_postagem: idx('data_postagem') !== -1 ? idx('data_postagem') : 3,
         resumo:        idx('resumo')        !== -1 ? idx('resumo')        : 4,
