@@ -876,9 +876,74 @@
       .week-cards { grid-template-columns: 1fr; }
       .site-header h1 { font-size: 1.05rem; }
     }
+    /* ── Password gate ── */
+    #pw-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #0d0d0d;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #pw-gate.hidden { display: none; }
+    .pw-box {
+      background: var(--surface);
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 48px 40px;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+    }
+    .pw-logo { margin-bottom: 24px; }
+    .pw-box h2 { font-size: 1.1rem; color: var(--text); margin-bottom: 8px; }
+    .pw-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; }
+    .pw-input-wrap { position: relative; margin-bottom: 12px; }
+    .pw-input-wrap input {
+      width: 100%; box-sizing: border-box;
+      background: #111; border: 1px solid #2a2a2a;
+      border-radius: 8px; padding: 12px 44px 12px 14px;
+      color: var(--text); font-size: 1rem; outline: none;
+    }
+    .pw-input-wrap input:focus { border-color: var(--accent); }
+    .pw-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 1rem; padding: 0;
+    }
+    .pw-btn {
+      width: 100%; padding: 12px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .pw-btn:hover { opacity: .85; }
+    .pw-error { color: #f87171; font-size: 0.82rem; margin-top: 8px; min-height: 18px; }
   </style>
 </head>
 <body>
+
+  <!-- Password gate -->
+  <div id="pw-gate">
+    <div class="pw-box">
+      <div class="pw-logo">
+        <svg width="80" height="27" viewBox="0 0 733 247" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M303.449 60.3652L335.137 60.3652L335.137 91.6953L335.137 183.597L303.449 183.597L303.449 123.025L335.137 91.6953L303.449 91.6953L303.449 60.3652Z" fill="white"/>
+          <path d="M490.007 62.291L398.411 62.291L398.411 91.4542L490.007 91.4542L490.007 124.784L397.358 124.784L366.826 154.988L366.826 185.193L398.411 185.193L398.411 153.947L490.007 153.947L520.538 124.784L520.538 91.4542L490.007 62.291Z" fill="white"/>
+          <path d="M548.757 62.291L548.757 185.193L579.289 185.193L579.289 93.5373L640.352 123.742L701.416 94.5788L701.416 62.291L640.352 93.5373L579.289 62.291L548.757 62.291Z" fill="white"/>
+          <path d="M243.449 62.291L211.762 62.291L211.762 122.863L180.074 91.533L180.074 62.291L148.387 62.291L148.387 185.193L180.074 185.193L180.074 154.988L211.762 123.658L211.762 185.193L243.449 185.193L243.449 62.291Z" fill="white"/>
+          <path d="M32 62.291L32 185.193L63.688 185.193L63.688 62.291L32 62.291Z" fill="white"/>
+          <path d="M95.688 62.291L95.688 185.193L127.375 185.193L127.375 62.291L95.688 62.291Z" fill="white"/>
+        </svg>
+      </div>
+      <h2>Monitor TikTok</h2>
+      <p>Acesso restrito à equipe IPM</p>
+      <div class="pw-input-wrap">
+        <input type="password" id="pw-input" placeholder="Senha" autocomplete="current-password" />
+        <button class="pw-toggle" id="pw-toggle" tabindex="-1" aria-label="Mostrar senha">👁</button>
+      </div>
+      <button class="pw-btn" id="pw-btn">Entrar</button>
+      <div class="pw-error" id="pw-error"></div>
+    </div>
+  </div>
 
   <!-- Header -->
   <header class="site-header">
@@ -942,7 +1007,6 @@
           <div class="filter-chips" id="chips-videos">
             <button class="chip active" data-filter="recentes">Mais recentes</button>
             <button class="chip" data-filter="atencao">⚠️ Precisa de atenção</button>
-            <button class="chip" data-filter="engajados">⭐ Mais engajados</button>
             <button class="chip" data-filter="alcance">🔥 Maior alcance</button>
           </div>
           <div class="table-toolbar">
@@ -1394,7 +1458,10 @@
     const videoTableState = { filter: 'recentes', sortKey: 'data', sortDir: 'desc' };
 
     function applyVideoFilter(videos, filter) {
-      if (filter === 'atencao') return videos.filter(v => v.sentimento !== 'Falando bem');
+      if (filter === 'atencao') return videos.filter(v =>
+        v.sentimento === 'Falando bem com ressalvas' || v.sentimento === 'Falando mal' || v.sentimento === 'Neutro'
+      );
+      if (filter === 'alcance') return videos.filter(v => v.alcance === 'Alto');
       return videos;
     }
 
@@ -1466,11 +1533,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-value">${alunosUnicos}</div>
-          <div class="stat-label">Alunos comentando</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${semLink}</div>
-          <div class="stat-label">Sem link na plataforma</div>
+          <div class="stat-label">Total de alunos que comentaram</div>
         </div>
       `;
 
@@ -1514,10 +1577,9 @@
           document.querySelectorAll('#chips-videos .chip').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           videoTableState.filter = btn.dataset.filter;
-          if (videoTableState.filter === 'atencao')       { videoTableState.sortKey = 'sentimento';  videoTableState.sortDir = 'desc'; }
-          else if (videoTableState.filter === 'engajados') { videoTableState.sortKey = 'engajamento'; videoTableState.sortDir = 'desc'; }
-          else if (videoTableState.filter === 'alcance')   { videoTableState.sortKey = 'alcance';     videoTableState.sortDir = 'desc'; }
-          else                                             { videoTableState.sortKey = 'data';        videoTableState.sortDir = 'desc'; }
+          if (videoTableState.filter === 'atencao')     { videoTableState.sortKey = 'sentimento'; videoTableState.sortDir = 'desc'; }
+          else if (videoTableState.filter === 'alcance') { videoTableState.sortKey = 'data';       videoTableState.sortDir = 'desc'; }
+          else                                           { videoTableState.sortKey = 'data';       videoTableState.sortDir = 'desc'; }
           renderVideosTable();
         });
       });
@@ -1645,7 +1707,38 @@
       }
     }
 
-    init();
+    // ── Password gate ──
+    (function () {
+      const PASS = 'IPM@1';
+      const SK = 'ipm_monitor_auth';
+      const gate = document.getElementById('pw-gate');
+      const input = document.getElementById('pw-input');
+      const btn = document.getElementById('pw-btn');
+      const toggle = document.getElementById('pw-toggle');
+      const err = document.getElementById('pw-error');
+
+      if (sessionStorage.getItem(SK) === '1') { gate.classList.add('hidden'); init(); return; }
+
+      function attempt() {
+        if (input.value === PASS) {
+          sessionStorage.setItem(SK, '1');
+          gate.classList.add('hidden');
+          init();
+        } else {
+          err.textContent = 'Senha incorreta. Tente novamente.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      btn.addEventListener('click', attempt);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+      toggle.addEventListener('click', () => {
+        input.type = input.type === 'password' ? 'text' : 'password';
+      });
+
+      input.focus();
+    })();
   </script>
 
 </body>
